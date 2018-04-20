@@ -6,7 +6,7 @@ var music;
 function preload() {
   game.load.image('bullet', 'assets/games/invaders/bullet.png');
   game.load.image('enemyBullet', 'assets/games/invaders/enemy-bullet.png');
-  game.load.spritesheet('invader', 'assets/games/invaders/invader32x32x4.png', 32, 32);
+  game.load.spritesheet('invader', 'assets/games/invaders/star.png', 32, 32);
   game.load.image('ship', 'assets/games/invaders/player.png');
   game.load.spritesheet('kaboom', 'assets/games/invaders/explode.png', 128, 128);
   game.load.image('starfield', 'assets/games/invaders/starfield.png');
@@ -146,14 +146,14 @@ function descend() {
 
 function update() {
   //  Scroll the background
-  starfield.tilePosition.y += 2;
+  starfield.tilePosition.y += 4;
 
   if (player.alive) {
     //  Reset the player, then check for movement keys
     player.body.velocity.setTo(0, 0);
 
-    if (cursors.left.isDown) player.body.velocity.x = -200;
-    else if (cursors.right.isDown) player.body.velocity.x = 200;
+    if (cursors.left.isDown) player.body.velocity.x = -400;
+    else if (cursors.right.isDown) player.body.velocity.x = 400;
 
     //  Firing?
     if (fireButton.isDown) fireBullet();
@@ -259,8 +259,8 @@ function enemyFires () {
       // And fire the bullet from this enemy
       enemyBullet.reset(shooter.body.x, shooter.body.y);
 
-      game.physics.arcade.moveToObject(enemyBullet,player,120);
-      firingTimer = game.time.now + 2000;
+      game.physics.arcade.moveToObject(enemyBullet,player,500);
+      firingTimer = game.time.now + 400;
   }
 
 }
