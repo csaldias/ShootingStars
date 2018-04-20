@@ -8,6 +8,7 @@ function preload() {
   game.load.image('enemyBullet', 'assets/games/invaders/enemy-bullet.png');
   game.load.spritesheet('invader', 'assets/games/invaders/star.png', 32, 32);
   game.load.image('ship', 'assets/games/invaders/player.png');
+  game.load.image('panel', 'assets/games/invaders/panel.png');
   game.load.spritesheet('kaboom', 'assets/games/invaders/explode.png', 128, 128);
   game.load.image('starfield', 'assets/games/invaders/starfield.png');
   game.load.image('background', 'assets/games/starstruck/background2.png');
@@ -15,6 +16,7 @@ function preload() {
 }
 
 var player;
+var panel;
 var aliens;
 var bullets;
 var bulletTime = 0;
@@ -26,6 +28,9 @@ var score = 0;
 var scoreString = '';
 var scoreText;
 var lives;
+var charge = 0;
+var chargeString = '';
+var chargeText;
 var enemyBullet;
 var firingTimer = 0;
 var stateText;
@@ -66,8 +71,11 @@ function create() {
 
   //  The hero!
   player = game.add.sprite(400, 500, 'ship');
+  panel = game.add.sprite(400, 530, 'panel');
   player.anchor.setTo(0.5, 0.5);
+  panel.anchor.setTo(0.5, 0.5);
   game.physics.enable(player, Phaser.Physics.ARCADE);
+  game.physics.enable(panel, Phaser.Physics.ARCADE);
 
   //  The baddies!
   aliens = game.add.group();
@@ -84,6 +92,9 @@ function create() {
   lives = game.add.group();
   game.add.text(game.world.width - 120, 10, 'Vidas : ', { font: '34px Arial', fill: '#fff' });
 
+  // Charge
+  chargeString = 'Carga : ';
+  chargeText = game.add.text(10, 550, chargeString + charge, { font: '34px Arial', fill: '#fff' });
   //  Text
   stateText = game.add.text(game.world.centerX,game.world.centerY,' ', { font: '42px Arial', fill: '#fff' });
   stateText.anchor.setTo(0.5, 0.5);
@@ -145,24 +156,32 @@ function descend() {
 }
 
 function update() {
+
   //  Scroll the background
   starfield.tilePosition.y += 4;
 
   if (player.alive) {
     //  Reset the player, then check for movement keys
     player.body.velocity.setTo(0, 0);
+    panel.body.velocity.setTo(0, 0);
 
-    if (cursors.left.isDown) player.body.velocity.x = -400;
-    else if (cursors.right.isDown) player.body.velocity.x = 400;
-
+    if (cursors.left.isDown && player.x > 50) {
+      player.body.velocity.x = -400;
+      panel.body.velocity.x = -400;
+    }
+    else if (cursors.right.isDown && player.x < 750) {
+      player.body.velocity.x = 400;
+      panel.body.velocity.x = 400;
+    }
     //  Firing?
     if (fireButton.isDown) fireBullet();
 
-    if (game.time.now > firingTimer) enemyFires();
+    if (game.time.now > firingTimer && game.time.now > 4000) enemyFires();
 
     //  Run collision
     game.physics.arcade.overlap(bullets, aliens, collisionHandler, null, this);
     game.physics.arcade.overlap(enemyBullets, player, enemyHitsPlayer, null, this);
+    game.physics.arcade.overlap(enemyBullets, panel, enemyHitsPanel, null, this);
   }
 }
 
@@ -224,6 +243,7 @@ function enemyHitsPlayer (player,bullet) {
   if (lives.countLiving() < 1)
   {
       player.kill();
+      panel.kill();
       enemyBullets.callAll('kill');
 
       stateText.text=" GAME OVER \n Click para empezar de nuevo";
@@ -232,6 +252,15 @@ function enemyHitsPlayer (player,bullet) {
       //the "click to restart" handler
       game.input.onTap.addOnce(restart,this);
   }
+
+}
+
+function enemyHitsPanel (panel, bullet) {
+
+  bullet.kill();
+
+  charge += 1;
+  chargeText.text = chargeString + charge;
 
 }
 
@@ -260,7 +289,7 @@ function enemyFires () {
       enemyBullet.reset(shooter.body.x, shooter.body.y);
 
       game.physics.arcade.moveToObject(enemyBullet,player,500);
-      firingTimer = game.time.now + 400;
+      firingTimer = game.time.now + 550;
   }
 
 }
@@ -268,18 +297,20 @@ function enemyFires () {
 function fireBullet () {
 
   //  To avoid them being allowed to fire too fast we set a time limit
-  if (game.time.now > bulletTime)
+  if (game.time.now > bulletTime && charge >= 5)
   {
-      //  Grab the first bullet we can from the pool
-      bullet = bullets.getFirstExists(false);
+    charge -= 5;
+    chargeText.text = chargeString + charge;
+    //  Grab the first bullet we can from the pool
+    bullet = bullets.getFirstExists(false);
 
-      if (bullet)
-      {
-          //  And fire it
-          bullet.reset(player.x, player.y + 8);
-          bullet.body.velocity.y = -400;
-          bulletTime = game.time.now + 200;
-      }
+    if (bullet)
+    {
+        //  And fire it
+        bullet.reset(player.x, player.y + 8);
+        bullet.body.velocity.y = -350;
+        bulletTime = game.time.now + 200;
+    }
   }
 
 }
@@ -294,6 +325,9 @@ function resetBullet (bullet) {
 function restart () {
   score = 0;
   scoreText.text = scoreString + score;
+
+  charge = 0;
+  chargeText.text = chargeString + charge;
   //  A new level starts
 
   //resets the life count
@@ -304,6 +338,7 @@ function restart () {
 
   //revives the player
   player.revive();
+  panel.revive();
   //hides the text
   stateText.visible = false;
 
