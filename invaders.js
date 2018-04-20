@@ -1,36 +1,17 @@
 
 var game = new Phaser.Game(800, 600, Phaser.AUTO, 'phaser-example', { preload: preload, create: create, update: update, render: render });
 
-var s;
 var music;
 
-function changeVolume(pointer) {
-
-    if (pointer.y < 100)
-    {
-        music.mute = false;
-    }
-    else if (pointer.y < 300)
-    {
-        music.volume += 0.1;
-    }
-    else
-    {
-        music.volume -= 0.1;
-    }
-}
-
 function preload() {
-
-    game.load.image('bullet', 'assets/games/invaders/bullet.png');
-    game.load.image('enemyBullet', 'assets/games/invaders/enemy-bullet.png');
-    game.load.spritesheet('invader', 'assets/games/invaders/invader32x32x4.png', 32, 32);
-    game.load.image('ship', 'assets/games/invaders/player.png');
-    game.load.spritesheet('kaboom', 'assets/games/invaders/explode.png', 128, 128);
-    game.load.image('starfield', 'assets/games/invaders/starfield.png');
-    game.load.image('background', 'assets/games/starstruck/background2.png');
-    game.load.audio('musicaFondo', 'assets/audio/shootingstars.mp3');
-
+  game.load.image('bullet', 'assets/games/invaders/bullet.png');
+  game.load.image('enemyBullet', 'assets/games/invaders/enemy-bullet.png');
+  game.load.spritesheet('invader', 'assets/games/invaders/invader32x32x4.png', 32, 32);
+  game.load.image('ship', 'assets/games/invaders/player.png');
+  game.load.spritesheet('kaboom', 'assets/games/invaders/explode.png', 128, 128);
+  game.load.image('starfield', 'assets/games/invaders/starfield.png');
+  game.load.image('background', 'assets/games/starstruck/background2.png');
+  game.load.audio('musicaFondo', 'assets/audio/shootingstars.mp3');
 }
 
 var player;
@@ -58,10 +39,6 @@ function create() {
 
   music.play();
 
-  s = game.add.sprite(game.world.centerX, game.world.centerY, 'disk');
-  s.anchor.setTo(0.5, 0.5);
-
-  game.input.onDown.add(changeVolume, this);
   game.physics.startSystem(Phaser.Physics.ARCADE);
 
   //  The scrolling starfield background
