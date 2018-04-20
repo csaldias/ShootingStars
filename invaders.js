@@ -33,6 +33,7 @@ var chargeString = '';
 var chargeText;
 var enemyBullet;
 var firingTimer = 0;
+var preparationTimer = 4000;
 var stateText;
 var livingEnemies = [];
 
@@ -176,7 +177,7 @@ function update() {
     //  Firing?
     if (fireButton.isDown) fireBullet();
 
-    if (game.time.now > firingTimer && game.time.now > 4000) enemyFires();
+    if (game.time.now > firingTimer && game.time.now > preparationTimer) enemyFires();
 
     //  Run collision
     game.physics.arcade.overlap(bullets, aliens, collisionHandler, null, this);
@@ -323,6 +324,7 @@ function resetBullet (bullet) {
 }
 
 function restart () {
+  preparationTimer = game.time.now + 4000;
   score = 0;
   scoreText.text = scoreString + score;
 
