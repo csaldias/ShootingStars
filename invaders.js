@@ -70,19 +70,19 @@ function create() {
     createAliens();
 
     //  The score
-    scoreString = 'Score : ';
+    scoreString = 'Puntos : ';
     scoreText = game.add.text(10, 10, scoreString + score, { font: '34px Arial', fill: '#fff' });
 
     //  Lives
     lives = game.add.group();
-    game.add.text(game.world.width - 100, 10, 'Lives : ', { font: '34px Arial', fill: '#fff' });
+    game.add.text(game.world.width - 100, 10, 'Vidas : ', { font: '34px Arial', fill: '#fff' });
 
     //  Text
-    stateText = game.add.text(game.world.centerX,game.world.centerY,' ', { font: '84px Arial', fill: '#fff' });
+    stateText = game.add.text(game.world.centerX,game.world.centerY,' ', { font: '42px Arial', fill: '#fff' });
     stateText.anchor.setTo(0.5, 0.5);
     stateText.visible = false;
 
-    for (var i = 0; i < 3; i++) 
+    for (var i = 0; i < 3; i++)
     {
         var ship = lives.create(game.world.width - 100 + (30 * i), 60, 'ship');
         ship.anchor.setTo(0.5, 0.5);
@@ -98,7 +98,7 @@ function create() {
     //  And some controls to play the game with
     cursors = game.input.keyboard.createCursorKeys();
     fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-    
+
 }
 
 function createAliens () {
@@ -206,7 +206,7 @@ function collisionHandler (bullet, alien) {
         scoreText.text = scoreString + score;
 
         enemyBullets.callAll('kill',this);
-        stateText.text = " You Won, \n Click to restart";
+        stateText.text = " Has ganado!, \n Click para empezar de nuevo";
         stateText.visible = true;
 
         //the "click to restart" handler
@@ -216,7 +216,7 @@ function collisionHandler (bullet, alien) {
 }
 
 function enemyHitsPlayer (player,bullet) {
-    
+
     bullet.kill();
 
     live = lives.getFirstAlive();
@@ -237,7 +237,7 @@ function enemyHitsPlayer (player,bullet) {
         player.kill();
         enemyBullets.callAll('kill');
 
-        stateText.text=" GAME OVER \n Click to restart";
+        stateText.text=" GAME OVER \n Click para empezar de nuevo";
         stateText.visible = true;
 
         //the "click to restart" handler
@@ -262,7 +262,7 @@ function enemyFires () {
 
     if (enemyBullet && livingEnemies.length > 0)
     {
-        
+
         var random=game.rnd.integerInRange(0,livingEnemies.length-1);
 
         // randomly select one of them
@@ -305,7 +305,7 @@ function resetBullet (bullet) {
 function restart () {
 
     //  A new level starts
-    
+
     //resets the life count
     lives.callAll('revive');
     //  And brings the aliens back from the dead :)
