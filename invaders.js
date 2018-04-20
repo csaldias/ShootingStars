@@ -82,7 +82,7 @@ function create() {
 
   //  Lives
   lives = game.add.group();
-  game.add.text(game.world.width - 100, 10, 'Vidas : ', { font: '34px Arial', fill: '#fff' });
+  game.add.text(game.world.width - 120, 10, 'Vidas : ', { font: '34px Arial', fill: '#fff' });
 
   //  Text
   stateText = game.add.text(game.world.centerX,game.world.centerY,' ', { font: '42px Arial', fill: '#fff' });
@@ -93,7 +93,7 @@ function create() {
     var ship = lives.create(game.world.width - 100 + (30 * i), 60, 'ship');
     ship.anchor.setTo(0.5, 0.5);
     ship.angle = 90;
-    ship.alpha = 0.4;
+    ship.alpha = 0.8;
   }
 
   //  An explosion pool
@@ -121,7 +121,7 @@ function createAliens () {
     }
 
     aliens.x = 50;
-    aliens.y = 50;
+    aliens.y = 65;
 
     //  All this does is basically start the invaders moving. Notice we're moving the Group they belong to, rather than the invaders directly.
     var tween = game.add.tween(aliens).to( { x: 320 }, 900, Phaser.Easing.Linear.None, true, 0, 1000, true);
@@ -292,7 +292,8 @@ function resetBullet (bullet) {
 }
 
 function restart () {
-
+  score = 0;
+  scoreText.text = scoreString + score;
   //  A new level starts
 
   //resets the life count
