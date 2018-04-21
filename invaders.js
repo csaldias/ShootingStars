@@ -1,20 +1,4 @@
-
-var game = new Phaser.Game(800, 600, Phaser.AUTO, 'phaser-example', { preload: preload, create: create, update: update, render: render });
-
 var music;
-
-function preload() {
-  game.load.image('bullet', 'assets/games/invaders/bullet.png');
-  game.load.image('enemyBullet', 'assets/games/invaders/enemy-bullet.png');
-  game.load.spritesheet('invader', 'assets/games/invaders/star.png', 32, 32);
-  game.load.image('ship', 'assets/games/invaders/player.png');
-  game.load.image('panel', 'assets/games/invaders/panel.png');
-  game.load.spritesheet('kaboom', 'assets/games/invaders/explode.png', 128, 128);
-  game.load.image('starfield', 'assets/games/invaders/starfield.png');
-  game.load.image('background', 'assets/games/starstruck/background2.png');
-  game.load.audio('musicaFondo', 'assets/audio/shootingstars.mp3');
-}
-
 var player;
 var panel;
 var aliens;
@@ -36,87 +20,6 @@ var firingTimer = 0;
 var preparationTimer = 4000;
 var stateText;
 var livingEnemies = [];
-
-function create() {
-  game.stage.backgroundColor = '#182d3b';
-  game.input.touch.preventDefault = false;
-
-  music = game.add.audio('musicaFondo');
-  music.loopFull();
-  music.play();
-
-  game.physics.startSystem(Phaser.Physics.ARCADE);
-
-  //  The scrolling starfield background
-  starfield = game.add.tileSprite(0, 0, 800, 600, 'starfield');
-
-  //  Our bullet group
-  bullets = game.add.group();
-  bullets.enableBody = true;
-  bullets.physicsBodyType = Phaser.Physics.ARCADE;
-  bullets.createMultiple(30, 'bullet');
-  bullets.setAll('anchor.x', 0.5);
-  bullets.setAll('anchor.y', 1);
-  bullets.setAll('outOfBoundsKill', true);
-  bullets.setAll('checkWorldBounds', true);
-
-  // The enemy's bullets
-  enemyBullets = game.add.group();
-  enemyBullets.enableBody = true;
-  enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
-  enemyBullets.createMultiple(30, 'enemyBullet');
-  enemyBullets.setAll('anchor.x', 0.5);
-  enemyBullets.setAll('anchor.y', 1);
-  enemyBullets.setAll('outOfBoundsKill', true);
-  enemyBullets.setAll('checkWorldBounds', true);
-
-  //  The hero!
-  player = game.add.sprite(400, 500, 'ship');
-  panel = game.add.sprite(400, 530, 'panel');
-  player.anchor.setTo(0.5, 0.5);
-  panel.anchor.setTo(0.5, 0.5);
-  game.physics.enable(player, Phaser.Physics.ARCADE);
-  game.physics.enable(panel, Phaser.Physics.ARCADE);
-
-  //  The baddies!
-  aliens = game.add.group();
-  aliens.enableBody = true;
-  aliens.physicsBodyType = Phaser.Physics.ARCADE;
-
-  createAliens();
-
-  //  The score
-  scoreString = 'Puntos : ';
-  scoreText = game.add.text(10, 10, scoreString + score, { font: '34px Arial', fill: '#fff' });
-
-  //  Lives
-  lives = game.add.group();
-  game.add.text(game.world.width - 120, 10, 'Vidas : ', { font: '34px Arial', fill: '#fff' });
-
-  // Charge
-  chargeString = 'Carga : ';
-  chargeText = game.add.text(10, 550, chargeString + charge, { font: '34px Arial', fill: '#fff' });
-  //  Text
-  stateText = game.add.text(game.world.centerX,game.world.centerY,' ', { font: '42px Arial', fill: '#fff' });
-  stateText.anchor.setTo(0.5, 0.5);
-  stateText.visible = false;
-
-  for (var i = 0; i < 3; i++) {
-    var ship = lives.create(game.world.width - 100 + (30 * i), 60, 'ship');
-    ship.anchor.setTo(0.5, 0.5);
-    ship.angle = 90;
-    ship.alpha = 0.8;
-  }
-
-  //  An explosion pool
-  explosions = game.add.group();
-  explosions.createMultiple(30, 'kaboom');
-  explosions.forEach(setupInvader, this);
-
-  //  And some controls to play the game with
-  cursors = game.input.keyboard.createCursorKeys();
-  fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-}
 
 function createAliens () {
 
@@ -153,44 +56,6 @@ function setupInvader (invader) {
 function descend() {
 
     aliens.y += 10;
-
-}
-
-function update() {
-
-  //  Scroll the background
-  starfield.tilePosition.y += 4;
-
-  if (player.alive) {
-    //  Reset the player, then check for movement keys
-    player.body.velocity.setTo(0, 0);
-    panel.body.velocity.setTo(0, 0);
-
-    if (cursors.left.isDown && player.x > 50) {
-      player.body.velocity.x = -400;
-      panel.body.velocity.x = -400;
-    }
-    else if (cursors.right.isDown && player.x < 750) {
-      player.body.velocity.x = 400;
-      panel.body.velocity.x = 400;
-    }
-    //  Firing?
-    if (fireButton.isDown) fireBullet();
-
-    if (game.time.now > firingTimer && game.time.now > preparationTimer) enemyFires();
-
-    //  Run collision
-    game.physics.arcade.overlap(bullets, aliens, collisionHandler, null, this);
-    game.physics.arcade.overlap(enemyBullets, player, enemyHitsPlayer, null, this);
-    game.physics.arcade.overlap(enemyBullets, panel, enemyHitsPanel, null, this);
-  }
-}
-
-function render() {
-  // for (var i = 0; i < aliens.length; i++)
-  // {
-  //     game.debug.body(aliens.children[i]);
-  // }
 
 }
 
@@ -345,3 +210,172 @@ function restart () {
   stateText.visible = false;
 
 }
+
+var bootState = {
+  create: function() {
+    game.physics.startSystem(Phaser.Physics.ARCADE);
+
+    game.state.start('load');
+  }
+}
+
+var loadState = {
+  preload: function() {
+    game.load.image('bullet', 'assets/games/invaders/bullet.png');
+    game.load.image('enemyBullet', 'assets/games/invaders/enemy-bullet.png');
+    game.load.spritesheet('invader', 'assets/games/invaders/star.png', 32, 32);
+    game.load.image('ship', 'assets/games/invaders/player.png');
+    game.load.image('panel', 'assets/games/invaders/panel.png');
+    game.load.spritesheet('kaboom', 'assets/games/invaders/explode.png', 128, 128);
+    game.load.image('starfield', 'assets/games/invaders/starfield.png');
+    game.load.image('background', 'assets/games/starstruck/background2.png');
+    game.load.audio('musicaFondo', 'assets/audio/shootingstars.mp3');
+
+    game.load.onLoadComplete.add(this.loadComplete, this);
+  },
+
+  loadComplete: function() {
+    game.state.start('menu');
+  }
+}
+
+var menuState = {
+  create: function() {
+    game.stage.backgroundColor = '#182d3b';
+    game.input.touch.preventDefault = false;
+
+    //  The scrolling starfield background
+    starfield = game.add.tileSprite(0, 0, 800, 600, 'starfield');
+
+    //  Welcome Message
+    welcomeMsg = game.add.text(250, 220, 'Shooting Stars', { font: '50px Arial', fill: '#fff' });
+
+    startMsg = game.add.text(150, 520, 'Presiona Espacio para Comenzar', { font: '34px Arial', fill: '#fff' });
+
+    startButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    startButton.onDown.addOnce(this.start, this);
+    },
+
+    start: function() {
+      game.state.start('play');
+    }
+}
+
+var playState = {
+  create: function() {
+    game.stage.backgroundColor = '#182d3b';
+    game.input.touch.preventDefault = false;
+
+    music = game.add.audio('musicaFondo');
+    music.loopFull();
+    music.play();
+
+    //  The scrolling starfield background
+      starfield = game.add.tileSprite(0, 0, 800, 600, 'starfield');
+
+    //  Our bullet group
+    bullets = game.add.group();
+    bullets.enableBody = true;
+    bullets.physicsBodyType = Phaser.Physics.ARCADE;
+    bullets.createMultiple(30, 'bullet');
+    bullets.setAll('anchor.x', 0.5);
+    bullets.setAll('anchor.y', 1);
+    bullets.setAll('outOfBoundsKill', true);
+    bullets.setAll('checkWorldBounds', true);
+
+    // The enemy's bullets
+    enemyBullets = game.add.group();
+    enemyBullets.enableBody = true;
+    enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
+    enemyBullets.createMultiple(30, 'enemyBullet');
+    enemyBullets.setAll('anchor.x', 0.5);
+    enemyBullets.setAll('anchor.y', 1);
+    enemyBullets.setAll('outOfBoundsKill', true);
+    enemyBullets.setAll('checkWorldBounds', true);
+
+    //  The hero!
+    player = game.add.sprite(400, 500, 'ship');
+    panel = game.add.sprite(400, 530, 'panel');
+    player.anchor.setTo(0.5, 0.5);
+    panel.anchor.setTo(0.5, 0.5);
+    game.physics.enable(player, Phaser.Physics.ARCADE);
+    game.physics.enable(panel, Phaser.Physics.ARCADE);
+
+    //  The baddies!
+    aliens = game.add.group();
+    aliens.enableBody = true;
+    aliens.physicsBodyType = Phaser.Physics.ARCADE;
+
+    createAliens();
+
+    //  The score
+    scoreString = 'Puntos : ';
+    scoreText = game.add.text(10, 10, scoreString + score, { font: '34px Arial', fill: '#fff' });
+
+    //  Lives
+    lives = game.add.group();
+    game.add.text(game.world.width - 120, 10, 'Vidas : ', { font: '34px Arial', fill: '#fff' });
+
+    // Charge
+    chargeString = 'Carga : ';
+    chargeText = game.add.text(10, 550, chargeString + charge, { font: '34px Arial', fill: '#fff' });
+    //  Text
+    stateText = game.add.text(game.world.centerX,game.world.centerY,' ', { font: '42px Arial', fill: '#fff' });
+    stateText.anchor.setTo(0.5, 0.5);
+    stateText.visible = false;
+
+    for (var i = 0; i < 3; i++) {
+      var ship = lives.create(game.world.width - 100 + (30 * i), 60, 'ship');
+      ship.anchor.setTo(0.5, 0.5);
+      ship.angle = 90;
+      ship.alpha = 0.8;
+    }
+
+    //  An explosion pool
+    explosions = game.add.group();
+    explosions.createMultiple(30, 'kaboom');
+    explosions.forEach(setupInvader, this);
+
+    //  And some controls to play the game with
+    cursors = game.input.keyboard.createCursorKeys();
+    fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+  },
+
+  update: function() {
+    //  Scroll the background
+    starfield.tilePosition.y += 4;
+
+    if (player.alive) {
+      //  Reset the player, then check for movement keys
+      player.body.velocity.setTo(0, 0);
+      panel.body.velocity.setTo(0, 0);
+
+      if (cursors.left.isDown && player.x > 50) {
+        player.body.velocity.x = -400;
+        panel.body.velocity.x = -400;
+      }
+      else if (cursors.right.isDown && player.x < 750) {
+        player.body.velocity.x = 400;
+        panel.body.velocity.x = 400;
+      }
+      //  Firing?
+      if (fireButton.isDown) fireBullet();
+
+      if (game.time.now > firingTimer && game.time.now > preparationTimer) enemyFires();
+
+      //  Run collision
+      game.physics.arcade.overlap(bullets, aliens, collisionHandler, null, this);
+      game.physics.arcade.overlap(enemyBullets, player, enemyHitsPlayer, null, this);
+      game.physics.arcade.overlap(enemyBullets, panel, enemyHitsPanel, null, this);
+    }
+  }
+}
+
+var game = new Phaser.Game(800, 600, Phaser.AUTO, 'phaser-example');
+
+game.state.add('boot', bootState);
+game.state.add('load', loadState);
+game.state.add('menu', menuState);
+game.state.add('play', playState);
+
+game.state.start('boot');
