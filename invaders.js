@@ -6,6 +6,7 @@ var bullets;
 var bulletTime = 0;
 var cursors;
 var fireButton;
+var shieldButton;
 var explosions;
 var starfield;
 var score = 0;
@@ -17,7 +18,10 @@ var chargeString = '';
 var chargeText;
 var enemyBullet;
 var firingTimer = 0;
+var shieldTimer = 0;
+var useShieldTimer = 4000;
 var preparationTimer = 4000;
+var shield = false;
 var stateText;
 var livingEnemies = [];
 
@@ -80,11 +84,12 @@ function collisionHandler (bullet, alien) {
       scoreText.text = scoreString + score;
 
       enemyBullets.callAll('kill',this);
-      stateText.text = " Has ganado!, \n Click para empezar de nuevo";
+      stateText.text = " Has ganado!, \n Dispara para empezar de nuevo";
       stateText.visible = true;
 
       //the "click to restart" handler
-      game.input.onTap.addOnce(restart,this);
+      restartButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+      restartButton.onDown.addOnce(restart, this);
   }
 
 }
@@ -112,11 +117,12 @@ function enemyHitsPlayer (player,bullet) {
       panel.kill();
       enemyBullets.callAll('kill');
 
-      stateText.text=" GAME OVER \n Click para empezar de nuevo";
+      stateText.text=" GAME OVER \n Dispara para empezar de nuevo";
       stateText.visible = true;
 
       //the "click to restart" handler
-      game.input.onTap.addOnce(restart,this);
+      restartButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+      restartButton.onDown.addOnce(restart, this);
   }
 
 }
@@ -339,6 +345,8 @@ var playState = {
     //  And some controls to play the game with
     cursors = game.input.keyboard.createCursorKeys();
     fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    shieldButton = game.input.keyboard.addKey(Phaser.Keyboard.Z);
+
   },
 
   update: function() {
@@ -358,9 +366,19 @@ var playState = {
         player.body.velocity.x = 400;
         panel.body.velocity.x = 400;
       }
+      else if (!shield && useShieldTimer < game.time.now && shieldButton.isDown) {
+        shieldTimer = game.time.now + 10000 // 10 segundos
+        panel.y -= 50;
+        shield = true;
+      }
       //  Firing?
-      if (fireButton.isDown) fireBullet();
+      if (fireButton.isDown && !shield) fireBullet();
 
+      if (shield && game.time.now > shieldTimer) {
+        useShieldTimer = game.time.now + 30000 // 30 segundos
+        panel.y += 50;
+        shield = false;
+      }
       if (game.time.now > firingTimer && game.time.now > preparationTimer) enemyFires();
 
       //  Run collision
