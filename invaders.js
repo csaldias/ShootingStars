@@ -196,6 +196,7 @@ function resetBullet (bullet) {
 
 function restart () {
   preparationTimer = game.time.now + 4000;
+  useShieldTimer = game.time.now + 4000;
   score = 0;
   scoreText.text = scoreString + score;
 
@@ -315,15 +316,20 @@ var playState = {
     createAliens();
 
     //  The score
-    scoreString = 'Puntos : ';
+    scoreString = 'Puntos: ';
     scoreText = game.add.text(10, 10, scoreString + score, { font: '34px Arial', fill: '#fff' });
 
     //  Lives
     lives = game.add.group();
-    game.add.text(game.world.width - 120, 10, 'Vidas : ', { font: '34px Arial', fill: '#fff' });
+    game.add.text(game.world.width - 120, 10, 'Vidas: ', { font: '34px Arial', fill: '#fff' });
+
+    //  Power Ups
+    shieldString = 'Escudo: ';
+    shieldS = shield ? 'ON' : 'OFF'
+    shieldText = game.add.text(game.world.width - 215, 550, shieldString + shieldS, { font: '34px Arial', fill: '#fff' });
 
     // Charge
-    chargeString = 'Carga : ';
+    chargeString = 'Carga: ';
     chargeText = game.add.text(10, 550, chargeString + charge, { font: '34px Arial', fill: '#fff' });
     //  Text
     stateText = game.add.text(game.world.centerX,game.world.centerY,' ', { font: '42px Arial', fill: '#fff' });
@@ -367,12 +373,17 @@ var playState = {
         panel.body.velocity.x = 400;
       }
       else if (!shield && useShieldTimer < game.time.now && shieldButton.isDown) {
-        shieldTimer = game.time.now + 10000 // 10 segundos
+        shieldTimer = game.time.now + 5000 // 5 segundos
         panel.y -= 50;
         shield = true;
       }
       //  Firing?
       if (fireButton.isDown && !shield) fireBullet();
+
+      if (useShieldTimer < game.time.now)
+        shieldText.text = shieldString + 'ON';
+      else
+        shieldText.text = shieldString + 'OFF';
 
       if (shield && game.time.now > shieldTimer) {
         useShieldTimer = game.time.now + 30000 // 30 segundos
