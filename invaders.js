@@ -159,6 +159,7 @@ function enemyFires () {
       var shooter=livingEnemies[random];
       // And fire the bullet from this enemy
       enemyBullet.reset(shooter.body.x, shooter.body.y);
+      enemyBullet.body.setSize(7, 7, 1, 1);
 
       game.physics.arcade.moveToObject(enemyBullet,player,500);
       firingTimer = game.time.now + 550;
@@ -307,6 +308,9 @@ var playState = {
     panel.anchor.setTo(0.5, 0.5);
     game.physics.enable(player, Phaser.Physics.ARCADE);
     game.physics.enable(panel, Phaser.Physics.ARCADE);
+    player.body.setSize(16, 14, 6, 4);
+    panel.body.setSize(75, 6, -5);
+
 
     //  The baddies!
     aliens = game.add.group();
@@ -373,7 +377,7 @@ var playState = {
         panel.body.velocity.x = 400;
       }
       else if (!shield && useShieldTimer < game.time.now && shieldButton.isDown) {
-        shieldTimer = game.time.now + 5000 // 5 segundos
+        shieldTimer = game.time.now + 6000 // 6 segundos
         panel.y -= 50;
         shield = true;
       }
@@ -386,7 +390,7 @@ var playState = {
         shieldText.text = shieldString + 'OFF';
 
       if (shield && game.time.now > shieldTimer) {
-        useShieldTimer = game.time.now + 30000 // 30 segundos
+        useShieldTimer = game.time.now + 15000 // 15 segundos
         panel.y += 50;
         shield = false;
       }
