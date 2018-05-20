@@ -198,6 +198,7 @@ function resetBullet (bullet) {
 function restart () {
   preparationTimer = game.time.now + 4000;
   useShieldTimer = game.time.now + 4000;
+  shield = false;
   score = 0;
   scoreText.text = scoreString + score;
 
@@ -342,7 +343,7 @@ var playState = {
     //  Power Ups
     shieldString = 'Escudo: ';
     shieldS = shield ? 'ON' : 'OFF'
-    shieldText = game.add.text(game.world.width - 215, 550, shieldString + shieldS, { font: '34px Arial', fill: '#fff' });
+    shieldText = game.add.text(game.world.width - 245, 550, shieldString + shieldS, { font: '34px Arial', fill: '#fff' });
 
     // Charge
     chargeString = 'Carga: ';
@@ -400,9 +401,9 @@ var playState = {
       if (fireButton.isDown && !shield) fireBullet();
 
       if (useShieldTimer < game.time.now)
-        shieldText.text = shieldString + 'ON';
+        shieldText.text = shieldString + 'LISTO';
       else
-        shieldText.text = shieldString + 'OFF';
+        shieldText.text = shieldString + 'Usado';
 
       if (shield && game.time.now > shieldTimer) {
         useShieldTimer = game.time.now + 15000 // 15 segundos
@@ -417,7 +418,7 @@ var playState = {
       game.physics.arcade.overlap(enemyBullets, panel, enemyHitsPanel, null, this);
     }
   },
-  
+
   gofull: function() {
     if (game.scale.isFullScreen) {
       game.scale.stopFullScreen();
