@@ -259,14 +259,26 @@ var menuState = {
     welcomeMsg = game.add.text(250, 220, 'Shooting Stars', { font: '50px Arial', fill: '#fff' });
 
     startMsg = game.add.text(150, 520, 'Presiona Espacio para Comenzar', { font: '34px Arial', fill: '#fff' });
+    startMsg = game.add.text(265, 490, 'Presiona F para FullScreen', { font: '25px Arial', fill: '#fff' });
 
     startButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
     startButton.onDown.addOnce(this.start, this);
-    },
 
-    start: function() {
-      game.state.start('play');
+    fullScreenButton = game.input.keyboard.addKey(Phaser.Keyboard.F);
+    fullScreenButton.onDown.add(this.gofull, this);
+  },
+
+  start: function() {
+    game.state.start('play');
+  },
+
+  gofull: function() {
+    if (game.scale.isFullScreen) {
+      game.scale.stopFullScreen();
+    } else {
+      game.scale.startFullScreen(false);
     }
+  }
 }
 
 var playState = {
@@ -357,6 +369,9 @@ var playState = {
     fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
     shieldButton = game.input.keyboard.addKey(Phaser.Keyboard.Z);
 
+    fullScreenButton = game.input.keyboard.addKey(Phaser.Keyboard.F);
+    fullScreenButton.onDown.add(this.gofull, this);
+
   },
 
   update: function() {
@@ -400,6 +415,14 @@ var playState = {
       game.physics.arcade.overlap(bullets, aliens, collisionHandler, null, this);
       game.physics.arcade.overlap(enemyBullets, player, enemyHitsPlayer, null, this);
       game.physics.arcade.overlap(enemyBullets, panel, enemyHitsPanel, null, this);
+    }
+  },
+  
+  gofull: function() {
+    if (game.scale.isFullScreen) {
+      game.scale.stopFullScreen();
+    } else {
+      game.scale.startFullScreen(false);
     }
   }
 }
