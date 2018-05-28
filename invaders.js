@@ -9,6 +9,8 @@ var fireButton;
 var shieldButton;
 var explosions;
 var starfield;
+var extraLifePU;
+var shieldPU;
 var score = 0;
 var scoreString = '';
 var scoreText;
@@ -19,11 +21,12 @@ var chargeText;
 var enemyBullet;
 var firingTimer = 0;
 var shieldTimer = 0;
-var useShieldTimer = 4000;
+var powerUpTimer = 15000;
 var preparationTimer = 4000;
 var shield = false;
 var stateText;
 var livingEnemies = [];
+var whatPowerUp = 0;
 
 function createAliens () {
 
@@ -94,6 +97,21 @@ function collisionHandler (bullet, alien) {
 
 }
 
+function shieldHitsPlayer (player,shieldPU) {
+
+  shieldPU.kill();
+  useShield();
+
+}
+
+function extraLifeHitsPlayer (player,extraLife) {
+
+  extraLife.kill();
+  //resets the life count
+  lives.callAll('revive');
+
+}
+
 function enemyHitsPlayer (player,bullet) {
 
   bullet.kill();
@@ -134,6 +152,32 @@ function enemyHitsPanel (panel, bullet) {
   charge += 1;
   chargeText.text = chargeString + charge;
 
+}
+
+function shieldFire () {
+
+  //  Grab the first bullet we can from the pool
+  shields = shieldPUs.getFirstExists(false);
+  shields.reset(game.rnd.integerInRange(10,790), 0);
+  shields.body.setSize(40, 40, 0, 0);
+
+  game.physics.arcade.moveToObject(shields,player,500);
+  powerUpTimer = game.time.now + game.rnd.integerInRange(20000,50000);
+
+  whatPowerUp = game.rnd.integerInRange(0,1);
+}
+
+function extraLifeFire () {
+
+  //  Grab the first bullet we can from the pool
+  extraLife = extraLifePUs.getFirstExists(false);
+  extraLife.reset(game.rnd.integerInRange(10,790), 0);
+  extraLife.body.setSize(40, 40, 0, 0);
+
+  game.physics.arcade.moveToObject(extraLife,player,500);
+  powerUpTimer = game.time.now + 10000;
+
+  whatPowerUp = game.rnd.integerInRange(0,1);
 }
 
 function enemyFires () {
@@ -197,8 +241,6 @@ function resetBullet (bullet) {
 
 function restart () {
   preparationTimer = game.time.now + 4000;
-  useShieldTimer = game.time.now + 4000;
-  shield = false;
   score = 0;
   scoreText.text = scoreString + score;
 
@@ -237,6 +279,8 @@ var loadState = {
     game.load.image('panel', 'assets/games/invaders/panel.png');
     game.load.spritesheet('kaboom', 'assets/games/invaders/explode.png', 128, 128);
     game.load.image('starfield', 'assets/games/invaders/starfield.png');
+    game.load.image('extraLifePU', 'assets/games/invaders/hearts.png');
+    game.load.image('shieldPU', 'assets/games/invaders/shield.png');
     game.load.image('background', 'assets/games/starstruck/background2.png');
     game.load.audio('musicaFondo', 'assets/audio/shootingstars.mp3');
 
@@ -282,6 +326,18 @@ var menuState = {
   }
 }
 
+function useShield() {
+  shieldTimer = game.time.now + 10000 // 10 segundos
+  panel.y -= 50;
+  shield = true;
+}
+
+function stopUsingShield() {
+  panel.y += 50;
+  shield = false;
+}
+
+
 var playState = {
   create: function() {
     game.stage.backgroundColor = '#182d3b';
@@ -303,6 +359,26 @@ var playState = {
     bullets.setAll('anchor.y', 1);
     bullets.setAll('outOfBoundsKill', true);
     bullets.setAll('checkWorldBounds', true);
+
+    // The Power Up shield
+    shieldPUs = game.add.group();
+    shieldPUs.enableBody = true;
+    shieldPUs.physicsBodyType = Phaser.Physics.ARCADE;
+    shieldPUs.createMultiple(2, 'shieldPU');
+    shieldPUs.setAll('anchor.x', 0.5);
+    shieldPUs.setAll('anchor.y', 1);
+    shieldPUs.setAll('outOfBoundsKill', true);
+    shieldPUs.setAll('checkWorldBounds', true);
+
+    // The Power Up life
+    extraLifePUs = game.add.group();
+    extraLifePUs.enableBody = true;
+    extraLifePUs.physicsBodyType = Phaser.Physics.ARCADE;
+    extraLifePUs.createMultiple(2, 'extraLifePU');
+    extraLifePUs.setAll('anchor.x', 0.5);
+    extraLifePUs.setAll('anchor.y', 1);
+    extraLifePUs.setAll('outOfBoundsKill', true);
+    extraLifePUs.setAll('checkWorldBounds', true);
 
     // The enemy's bullets
     enemyBullets = game.add.group();
@@ -340,11 +416,6 @@ var playState = {
     lives = game.add.group();
     game.add.text(game.world.width - 120, 10, 'Vidas: ', { font: '34px Arial', fill: '#fff' });
 
-    //  Power Ups
-    shieldString = 'Escudo: ';
-    shieldS = shield ? 'ON' : 'OFF'
-    shieldText = game.add.text(game.world.width - 245, 550, shieldString + shieldS, { font: '34px Arial', fill: '#fff' });
-
     // Charge
     chargeString = 'Carga: ';
     chargeText = game.add.text(10, 550, chargeString + charge, { font: '34px Arial', fill: '#fff' });
@@ -368,7 +439,6 @@ var playState = {
     //  And some controls to play the game with
     cursors = game.input.keyboard.createCursorKeys();
     fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-    shieldButton = game.input.keyboard.addKey(Phaser.Keyboard.Z);
 
     fullScreenButton = game.input.keyboard.addKey(Phaser.Keyboard.F);
     fullScreenButton.onDown.add(this.gofull, this);
@@ -392,28 +462,20 @@ var playState = {
         player.body.velocity.x = 400;
         panel.body.velocity.x = 400;
       }
-      else if (!shield && useShieldTimer < game.time.now && shieldButton.isDown) {
-        shieldTimer = game.time.now + 6000 // 6 segundos
-        panel.y -= 50;
-        shield = true;
-      }
       //  Firing?
       if (fireButton.isDown && !shield) fireBullet();
 
-      if (useShieldTimer < game.time.now)
-        shieldText.text = shieldString + 'LISTO';
-      else
-        shieldText.text = shieldString + 'Usado';
-
-      if (shield && game.time.now > shieldTimer) {
-        useShieldTimer = game.time.now + 15000 // 15 segundos
-        panel.y += 50;
-        shield = false;
-      }
       if (game.time.now > firingTimer && game.time.now > preparationTimer) enemyFires();
+
+      if (game.time.now > powerUpTimer && whatPowerUp == 1) extraLifeFire();
+      else if (game.time.now > powerUpTimer) shieldFire();
+
+      if (game.time.now > shieldTimer && shield) stopUsingShield();
 
       //  Run collision
       game.physics.arcade.overlap(bullets, aliens, collisionHandler, null, this);
+      game.physics.arcade.overlap(extraLifePUs, player, extraLifeHitsPlayer, null, this);
+      game.physics.arcade.overlap(shieldPUs, player, shieldHitsPlayer, null, this);
       game.physics.arcade.overlap(enemyBullets, player, enemyHitsPlayer, null, this);
       game.physics.arcade.overlap(enemyBullets, panel, enemyHitsPanel, null, this);
     }
