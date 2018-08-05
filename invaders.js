@@ -27,6 +27,9 @@ var shield = false;
 var stateText;
 var livingEnemies = [];
 var whatPowerUp = 0;
+var statTime = 0;
+var statBullets = 0;
+var statBonus = 0;
 
 function createAliens () {
 
@@ -101,7 +104,8 @@ function shieldHitsPlayer (player,shieldPU) {
 
   shieldPU.kill();
   useShield();
-
+  statBonus += 1;
+  statText3.text = statString3 + statBonus;
 }
 
 function extraLifeHitsPlayer (player,extraLife) {
@@ -109,7 +113,8 @@ function extraLifeHitsPlayer (player,extraLife) {
   extraLife.kill();
   //resets the life count
   lives.callAll('revive');
-
+  statBonus += 1;
+  statText3.text = statString3 + statBonus;
 }
 
 function enemyHitsPlayer (player,bullet) {
@@ -156,7 +161,6 @@ function enemyHitsPanel (panel, bullet) {
 
 function shieldFire () {
 
-  //  Grab the first bullet we can from the pool
   shields = shieldPUs.getFirstExists(false);
   shields.reset(game.rnd.integerInRange(10,790), 0);
   shields.body.setSize(40, 40, 0, 0);
@@ -227,6 +231,8 @@ function fireBullet () {
         bullet.reset(player.x, player.y + 8);
         bullet.body.velocity.y = -350;
         bulletTime = game.time.now + 200;
+        statBullets += 1;
+        statText2.text = statString2 + statBullets;
     }
   }
 
@@ -337,7 +343,6 @@ function stopUsingShield() {
   shield = false;
 }
 
-
 var playState = {
   create: function() {
     game.stage.backgroundColor = '#182d3b';
@@ -412,6 +417,15 @@ var playState = {
     scoreString = 'Puntos: ';
     scoreText = game.add.text(10, 10, scoreString + score, { font: '34px Arial', fill: '#fff' });
 
+    //  The stats
+    statString1 = 'Tiempo de juego: ';
+    statString2 = 'Balas disparadas: ';
+    statString3 = 'Power Ups adquiridos: ';
+
+    statText1 = game.add.text(615, 540, statString1 + statTime, { font: '15px Arial', fill: '#fff' });
+    statText2 = game.add.text(615, 560, statString2 + statBullets, { font: '15px Arial', fill: '#fff' });
+    statText3 = game.add.text(615, 580, statString3 + statBonus, { font: '15px Arial', fill: '#fff' });
+
     //  Lives
     lives = game.add.group();
     game.add.text(game.world.width - 120, 10, 'Vidas: ', { font: '34px Arial', fill: '#fff' });
@@ -448,6 +462,15 @@ var playState = {
   update: function() {
     //  Scroll the background
     starfield.tilePosition.y += 4;
+
+    //  Increase the time stat
+    statTimeS = (Math.trunc(game.time.now/1000))%60;
+    if (statTimeS < 10) statTimeS = '0' + statTimeS;
+    statTimeM = (Math.trunc(game.time.now/60000))%60;
+    if (statTimeM < 10) statTimeM = '0' + statTimeM;
+    statTimeH = Math.trunc(game.time.now/3600000);
+    if (statTimeH < 10) statTimeH = '0' + statTimeH;
+    statText1.text = statString1 + statTimeH + ':' + statTimeM + ':' + statTimeS;
 
     if (player.alive) {
       //  Reset the player, then check for movement keys
